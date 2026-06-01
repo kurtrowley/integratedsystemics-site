@@ -1,0 +1,86 @@
+{
+  "site": {
+    "brand": "Integrated Systemics",
+    "brand_short": "IS",
+    "tagline": "Systems-based training · writing · research"
+  },
+  "nav": [
+    { "label": "Work",        "href": "#work" },
+    { "label": "Programs",    "href": "#programs" },
+    { "label": "Writing",     "href": "#writing" },
+    { "label": "Simulations", "href": "#simulations" },
+    { "label": "Vision",      "href": "#vision" }
+  ],
+  "hero": {
+    "eyebrow": "Systems-based research, training, and development",
+    "headline": "Build human capability for a more complex world.",
+    "lede": "Integrated Systemics develops high-end training, writing systems, and research-backed frameworks for health reclamation, expert communication, and future-oriented human development.",
+    "cta_primary":   { "text": "Explore programs",    "href": "#programs" },
+    "cta_secondary": { "text": "See writing systems",  "href": "#writing" },
+    "aside_kicker":  "What this is",
+    "aside_summary": "A premium systems studio for transformation, authorship, and applied research.",
+    "aside_stats": [
+      { "label": "Training",  "body": "Premium programs for skills, health, and capability rebuilding." },
+      { "label": "Writing",   "body": "AI-assisted but expert-led processes for books, articles, and strategy." },
+      { "label": "Research",  "body": "Think-tank style exploration of complex systems and future society." }
+    ]
+  },
+  "sections": [
+    {
+      "id": "work",
+      "type": "cards",
+      "heading": "How it is framed",
+      "body": "This is not generic coaching or a software lab. It is a systems-oriented knowledge brand with premium educational offerings and a clear intellectual backbone.",
+      "items": [
+        { "heading": "Applied systems science", "body": "Method, frameworks, and analysis for complex human and organizational problems." },
+        { "heading": "High-end education",      "body": "Structured programs with direct outcomes, clear curricula, and high-touch support." },
+        { "heading": "Research and products",   "body": "Books, tools, essays, and future-facing concepts that spin out of the studio." }
+      ]
+    },
+    {
+      "id": "programs",
+      "type": "steps",
+      "heading": "Program architecture",
+      "body": "High-end training programs structured around measurable transformation. Serious, outcome-oriented, and systems-informed throughout.",
+      "items": [
+        { "number": "01", "heading": "Diagnose",  "body": "Clarify constraints, goals, and system patterns." },
+        { "number": "02", "heading": "Rebuild",   "body": "Train core skills and reorganize the work process." },
+        { "number": "03", "heading": "Integrate", "body": "Stabilize habits, tools, and higher-order performance." },
+        { "number": "04", "heading": "Scale",     "body": "Transfer capability into writing, health, and production." }
+      ]
+    },
+    {
+      "id": "writing",
+      "type": "cards",
+      "heading": "Writing systems",
+      "body": "All writing is ultimately a form of instruction. AI supports the process — judgment, analysis, and voice remain human-led.",
+      "items": [
+        { "heading": "Systemic Writing",     "body": "Turn ideas into durable books, essays, and educational material." },
+        { "heading": "AI-assisted craft",    "body": "Use models to accelerate structure, drafting, and revision without losing authorship." },
+        { "heading": "Instructional rigor",  "body": "Every piece of writing is designed for transfer, understanding, and action." }
+      ]
+    },
+    {
+      "id": "simulations",
+      "type": "sim",
+      "heading": "Complex Systems — Live",
+      "body": "Interactive simulations that make the core ideas of systemics tangible. Each demo runs in your browser, fully adjustable in real time.",
+      "featured_link": { "text": "Open ME/CFS Outbreak Simulator →", "href": "sims.html" },
+      "sims": [
+        { "id": "lorenz",   "label": "Lorenz Attractor" },
+        { "id": "boids",    "label": "Emergence / Flocking" },
+        { "id": "feedback", "label": "Feedback Loops" }
+      ]
+    },
+    {
+      "id": "vision",
+      "type": "prose",
+      "heading": "Vision",
+      "body": "Human potential requires new tools, new training systems, and better models of complexity. Integrated Systemics exists to develop those systems — and to help people use them."
+    }
+  ],
+  "footer": {
+    "brand": "Integrated Systemics",
+    "tagline": "Systems-based training · writing · research"
+  }
+}

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Integrated Systemics</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    (function(){
+      const saved = localStorage.getItem('isrd-theme') || 'dark';
+      document.documentElement.dataset.theme = saved;
+      document.addEventListener('DOMContentLoaded', function(){
+        const btn = document.getElementById('themeBtn');
+        if (!btn) return;
+        btn.textContent = saved === 'dark' ? 'Light mode' : 'Dark mode';
+        btn.addEventListener('click', function(){
+          const dark = document.documentElement.dataset.theme === 'dark';
+          const next = dark ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          btn.textContent = next === 'dark' ? 'Light mode' : 'Dark mode';
+          localStorage.setItem('isrd-theme', next);
+        });
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="site-shell">
+
+    <!-- ── Top bar ───────────────────────────────────────────────── -->
+    <header class="topbar">
+      <div class="brand" data-slot="brand">Integrated Systemics</div>
+      <nav class="nav" id="mainNav">
+        <!-- populated by render-index.js -->
+        <button class="theme-toggle" id="themeBtn">Light mode</button>
+      </nav>
+    </header>
+
+    <main>
+
+      <!-- ── Hero ─────────────────────────────────────────────────── -->
+      <section class="hero panel">
+        <div class="hero-copy">
+          <div class="eyebrow"  id="heroEyebrow"></div>
+          <h1 id="heroHeadline"></h1>
+          <p class="lede"       id="heroLede"></p>
+          <div class="actions">
+            <a class="btn primary" id="heroCTAPrimary"   href="#programs"></a>
+            <a class="btn"         id="heroCTASecondary" href="#writing"></a>
+          </div>
+        </div>
+        <aside class="hero-aside">
+          <div class="aside-kicker"  id="heroAsideKicker"></div>
+          <p class="aside-text"      id="heroAsideSummary"></p>
+          <div id="heroStats"><!-- stats injected --></div>
+        </aside>
+      </section>
+
+      <!-- ── Work ─────────────────────────────────────────────────── -->
+      <section class="section panel" id="work">
+        <h2 data-slot="section-heading"></h2>
+        <p  data-slot="section-body"></p>
+        <div data-slot="grid" class="grid three-up"></div>
+      </section>
+
+      <!-- ── Programs ─────────────────────────────────────────────── -->
+      <section class="section panel" id="programs">
+        <h2 data-slot="section-heading"></h2>
+        <p  data-slot="section-body"></p>
+        <div data-slot="grid" class="grid four-up"></div>
+      </section>
+
+      <!-- ── Writing ──────────────────────────────────────────────── -->
+      <section class="section panel" id="writing">
+        <h2 data-slot="section-heading"></h2>
+        <p  data-slot="section-body"></p>
+        <div data-slot="grid" class="grid three-up"></div>
+      </section>
+
+      <!-- ── Simulations ───────────────────────────────────────────── -->
+      <section class="section panel sim-section" id="simulations">
+        <h2 data-slot="section-heading"></h2>
+        <p  data-slot="section-body"></p>
+
+        <div style="margin-bottom:14px">
+          <a class="btn primary" data-slot="sim-link" href="sims.html" style="font-size:.9rem"></a>
+        </div>
+
+        <div class="sim-tabs" id="simTabs">
+          <button class="sim-tab active" data-sim="lorenz">Lorenz Attractor</button>
+          <button class="sim-tab"        data-sim="boids">Emergence / Flocking</button>
+          <button class="sim-tab"        data-sim="feedback">Feedback Loops</button>
+        </div>
+
+        <div class="sim-stage">
+          <div class="sim-canvas-wrap">
+            <canvas id="simCanvas"></canvas>
+          </div>
+          <div class="sim-controls">
+            <div class="sim-info">
+              <h4 id="simTitle">Loading…</h4>
+              <p  id="simDesc"></p>
+            </div>
+            <div class="sim-params" id="simParams"><h4>Parameters</h4></div>
+            <div class="sim-btns">
+              <button class="sim-btn play" id="playBtn">Pause</button>
+              <button class="sim-btn"      id="resetBtn">Reset</button>
+            </div>
+            <div class="sim-stats" id="simStats"></div>
+          </div>
+        </div>
+        <!-- no data-slot="grid" — sim section has custom layout above -->
+      </section>
+
+      <!-- ── Vision ───────────────────────────────────────────────── -->
+      <section class="section panel" id="vision">
+        <h2 data-slot="section-heading"></h2>
+        <p  data-slot="section-body"></p>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div id="footerBrand"></div>
+      <div id="footerTagline"></div>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { renderIndex } from './js/render-index.js';
+    import { SimEngine }   from './sim-engine.js';
+    import { LorenzSim }   from './sims/lorenz.js';
+    import { BoidsSim }    from './sims/boids.js';
+    import { FeedbackSim } from './sims/feedback.js';
+
+    // ── Content render (populates all text from JSON) ──────────────
+    await renderIndex();
+
+    // ── Inline sim engine ──────────────────────────────────────────
+    const engine = new SimEngine('simCanvas');
+    engine.register('lorenz',   LorenzSim);
+    engine.register('boids',    BoidsSim);
+    engine.register('feedback', FeedbackSim);
+
+    const SIMS = { lorenz: LorenzSim, boids: BoidsSim, feedback: FeedbackSim };
+
+    function buildParams(simId) {
+      const sim  = SIMS[simId];
+      const wrap = document.getElementById('simParams');
+      wrap.innerHTML = '<h4>Parameters</h4>';
+      for (const [key, cfg] of Object.entries(sim.params)) {
+        const row = document.createElement('div');
+        row.className = 'param-row';
+        row.innerHTML = `
+          <label>${cfg.label} <span id="val-${key}">${cfg.default}</span></label>
+          <input type="range" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}"
+                 value="${cfg.default}" data-key="${key}" />`;
+        wrap.appendChild(row);
+      }
+      wrap.querySelectorAll('input[type=range]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          document.getElementById('val-' + inp.dataset.key).textContent =
+            (+inp.value).toFixed(inp.step.includes('.') ? inp.step.split('.')[1].length : 0);
+          engine.setParam(inp.dataset.key, inp.value);
+        });
+      });
+    }
+
+    function loadSim(id) {
+      const sim = SIMS[id];
+      document.getElementById('simTitle').textContent = sim.label;
+      document.getElementById('simDesc').textContent  = sim.description;
+      buildParams(id);
+      engine.load(id);
+      document.getElementById('playBtn').textContent = 'Pause';
+      document.getElementById('playBtn').classList.add('play');
+    }
+
+    engine.onStats(stats => {
+      document.getElementById('simStats').innerHTML = Object.entries(stats)
+        .map(([k,v]) => `<div class="stat-pill"><span>${k}</span><span>${v}</span></div>`)
+        .join('');
+    });
+
+    document.getElementById('simTabs').addEventListener('click', e => {
+      const tab = e.target.closest('.sim-tab');
+      if (!tab) return;
+      document.querySelectorAll('.sim-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadSim(tab.dataset.sim);
+    });
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+      const pb = document.getElementById('playBtn');
+      if (engine.isRunning) {
+        engine.pause(); pb.textContent = 'Play'; pb.classList.remove('play');
+      } else {
+        engine.play();  pb.textContent = 'Pause'; pb.classList.add('play');
+      }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      engine.reset();
+      document.getElementById('playBtn').textContent = 'Pause';
+      document.getElementById('playBtn').classList.add('play');
+    });
+
+    loadSim('lorenz');
+  </script>
+</body>
+</html>
