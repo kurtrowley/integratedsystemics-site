@@ -127,6 +127,16 @@
   </div>
 
   <script type="module">
+    if (location.protocol === 'file:') {
+      document.body.innerHTML = `<div style="font-family:Inter,sans-serif;padding:48px;max-width:540px;
+        margin:80px auto;background:#0e1a22;color:#c8dce4;border-radius:18px;border:1px solid #253340;line-height:1.7">
+        <div style="font-size:1.2rem;font-weight:700;margin-bottom:10px;color:#e0eef4">Local server required</div>
+        <p>This page uses ES modules and loads content from JSON files, which browsers block on <code>file://</code>.</p>
+        <p><strong>Fix:</strong> double-click <code>run_local.bat</code> in the project folder, then open
+        <a href="http://localhost:8000" style="color:#3a8fa8">http://localhost:8000</a>.</p>
+      </div>`;
+      throw new Error('file:// not supported');
+    }
     import { renderIndex } from './js/render-index.js';
     import { SimEngine }   from './sim-engine.js';
     import { LorenzSim }   from './sims/lorenz.js';

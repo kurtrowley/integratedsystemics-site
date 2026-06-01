@@ -119,11 +119,18 @@ export function renderYouProfile(c, simRef) {
 
     if (field.type === 'range') {
       const dispVal = field.key === 'age' ? field.default : (+field.default).toFixed(2);
+      const hasScale = field.min_label || field.max_label;
       row.innerHTML = `
         <label>${field.label} <span id="yv-${field.key}">${dispVal}</span></label>
-        <input type="range" data-you="${field.key}"
+        ${hasScale ? `<div class="you-scale-labels">
+          <span class="you-scale-min">${field.min_label || ''}</span>
+          <input type="range" data-you="${field.key}"
+                 min="${field.min}" max="${field.max}" step="${field.step || 0.05}"
+                 value="${field.default}" />
+          <span class="you-scale-max">${field.max_label || ''}</span>
+        </div>` : `<input type="range" data-you="${field.key}"
                min="${field.min}" max="${field.max}" step="${field.step || 0.05}"
-               value="${field.default}" />
+               value="${field.default}" />`}
         ${field.note ? `<div class="you-note">${field.note}</div>` : ''}`;
     } else if (field.type === 'toggle') {
       const opts = field.options;
@@ -151,14 +158,15 @@ export function renderYouProfile(c, simRef) {
   wrap.appendChild(resetBtn);
 
   // Wire inputs
-  wrap.querySelectorAll('input[data-you]').forEach(inp => {
-    inp.addEventListener('input', () => {
-      const key = inp.dataset.you;
-      const val = +inp.value;
-      const disp = document.getElementById('yv-' + key);
-      if (disp) disp.textContent = key === 'age' ? val : val.toFixed(2);
-      if (simRef?.current) simRef.current.updateViewpointParam(key, val);
-    });
+  // Use event delegation so both inline and scale-wrapped inputs are caught
+  wrap.addEventListener('input', e => {
+    const inp = e.target;
+    if (!inp.dataset.you) return;
+    const key = inp.dataset.you;
+    const val = +inp.value;
+    const disp = document.getElementById('yv-' + key);
+    if (disp) disp.textContent = key === 'age' ? val : val.toFixed(2);
+    if (simRef?.current) simRef.current.updateViewpointParam(key, val);
   });
 
   wrap.querySelectorAll('.you-toggle').forEach(tog => {

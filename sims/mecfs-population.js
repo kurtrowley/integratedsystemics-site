@@ -89,6 +89,10 @@ class Person {
     this.generalFitness       = Math.random();  // 0=poor, 1=excellent (protective when high)
     this.dietQuality          = Math.random();  // 0=poor, 1=excellent (protective when high)
 
+    // ── Personal environmental exposures ────────────────────────────
+    this.moldExposure         = Math.random() < 0.12 ? 0.3 + Math.random() * 0.7 : Math.random() * 0.15;
+    this.chemicalExposure     = Math.random() < 0.10 ? 0.3 + Math.random() * 0.7 : Math.random() * 0.12;
+
     // ── Prior infection history ─────────────────────────────────────
     this.priorHHV6            = Math.random() < 0.95;
     this.priorCMV             = Math.random() < 0.60;
@@ -112,6 +116,8 @@ class Person {
       this.priorConditions        = 0.15 + Math.random() * 0.40;
       this.digestiveHealth        = 0.20 + Math.random() * 0.50;
       this.neurodivergence        = Math.random() < 0.25 ? 0.3 + Math.random() * 0.5 : Math.random() * 0.2;
+      this.moldExposure           = Math.random() * 0.3;
+      this.chemicalExposure       = Math.random() * 0.2;
     }
 
     // ── Simulation state ────────────────────────────────────────────
@@ -183,6 +189,9 @@ class Person {
       this.metabolicHealth        * 0.050 + // mitochondrial/metabolic compromise
       (1 - this.generalFitness)   * 0.030 + // lower fitness → reduced immune resilience
       (1 - this.dietQuality)      * 0.025 + // inflammatory diet burden
+      // ── Personal environmental exposures ─────────────────────────
+      (this.moldExposure     ?? 0) * 0.035 + // mycotoxin immune burden
+      (this.chemicalExposure ?? 0) * 0.030 + // chemical/oxidative stress load
       // ── Prior viral history ───────────────────────────────────────
       priorViralBonus                      +
       agePeak                              +
@@ -839,18 +848,16 @@ export class MECFSPopulationSim {
     if (!vp) return null;
     return {
       age: vp.age, sex: vp.sex,
-      // core
       baselineStress: vp.baselineStress, sleepQuality: vp.sleepQuality,
       immuneFunction: vp.immuneFunction, susceptibility: vp.susceptibility,
       priorConditions: vp.priorConditions, economicStress: vp.economicStress,
       socialSupport: vp.socialSupport,
-      // neurological
       neurodivergence: vp.neurodivergence, emotionalStressLoad: vp.emotionalStressLoad,
       mechanicalBrainstemLoad: vp.mechanicalBrainstemLoad,
-      // systemic
       digestiveHealth: vp.digestiveHealth, metabolicHealth: vp.metabolicHealth,
       generalFitness: vp.generalFitness, dietQuality: vp.dietQuality,
-      // prior infections
+      moldExposure: vp.moldExposure, chemicalExposure: vp.chemicalExposure,
+      pollutionExp: vp.pollutionExp,
       priorEBV: vp.priorEBV, priorHHV6: vp.priorHHV6,
       priorCMV: vp.priorCMV, priorLyme: vp.priorLyme, priorMycoplasma: vp.priorMycoplasma,
     };
@@ -878,6 +885,9 @@ export class MECFSPopulationSim {
     vp.metabolicHealth         = Math.random() < 0.25 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.4;
     vp.generalFitness          = Math.random();
     vp.dietQuality             = Math.random();
+    vp.moldExposure            = Math.random() < 0.12 ? 0.3 + Math.random() * 0.6 : Math.random() * 0.15;
+    vp.chemicalExposure        = Math.random() < 0.10 ? 0.3 + Math.random() * 0.6 : Math.random() * 0.12;
+    vp.pollutionExp            = Math.random();
     // Prior infections
     vp.priorEBV                = Math.random() < 0.90;
     vp.priorHHV6               = Math.random() < 0.95;
