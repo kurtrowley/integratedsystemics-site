@@ -106,27 +106,35 @@ export function renderYouProfile(c, simRef) {
   wrap.innerHTML = `<p class="you-desc">${prof.description}</p>`;
 
   prof.fields.forEach(field => {
+    if (field.type === 'section_header') {
+      const hdr = document.createElement('div');
+      hdr.className = 'you-section-hdr';
+      hdr.textContent = field.label;
+      wrap.appendChild(hdr);
+      return;
+    }
+
     const row = document.createElement('div');
     row.className = 'env-row';
 
     if (field.type === 'range') {
+      const dispVal = field.key === 'age' ? field.default : (+field.default).toFixed(2);
       row.innerHTML = `
-        <label>${field.label} <span id="yv-${field.key}">${
-          field.key === 'age' ? field.default : field.default.toFixed(2)
-        }</span></label>
+        <label>${field.label} <span id="yv-${field.key}">${dispVal}</span></label>
         <input type="range" data-you="${field.key}"
                min="${field.min}" max="${field.max}" step="${field.step || 0.05}"
-               value="${field.default}" />`;
+               value="${field.default}" />
+        ${field.note ? `<div class="you-note">${field.note}</div>` : ''}`;
     } else if (field.type === 'toggle') {
       const opts = field.options;
+      const first = field.default === opts[0] || field.default === true;
       row.innerHTML = `
         <label>${field.label}</label>
         <div class="you-toggle" data-you="${field.key}">
-          <button class="you-opt ${field.default === opts[0] || field.default === true ? 'active' : ''}"
-                  data-val="${opts[0]}">${opts[0]}</button>
-          <button class="you-opt ${field.default === opts[1] || field.default === false ? 'active' : ''}"
-                  data-val="${opts[1]}">${opts[1]}</button>
-        </div>`;
+          <button class="you-opt ${first ? 'active' : ''}" data-val="${opts[0]}">${opts[0]}</button>
+          <button class="you-opt ${!first ? 'active' : ''}" data-val="${opts[1]}">${opts[1]}</button>
+        </div>
+        ${field.note ? `<div class="you-note">${field.note}</div>` : ''}`;
     }
     wrap.appendChild(row);
   });
@@ -158,12 +166,13 @@ export function renderYouProfile(c, simRef) {
       btn.addEventListener('click', () => {
         tog.querySelectorAll('.you-opt').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const key  = tog.dataset.you;
+        const key    = tog.dataset.you;
         const rawVal = btn.dataset.val;
-        // Convert string values to appropriate types
+        const boolKeys = ['priorEBV','priorHHV6','priorCMV','priorLyme','priorMycoplasma'];
         let val;
-        if (rawVal === 'Yes' || rawVal === 'Female') val = key === 'priorEBV' ? true : 'F';
-        else if (rawVal === 'No'  || rawVal === 'Male') val = key === 'priorEBV' ? false : 'M';
+        if (rawVal === 'Female') val = 'F';
+        else if (rawVal === 'Male') val = 'M';
+        else if (boolKeys.includes(key)) val = rawVal === 'Yes';
         else val = rawVal;
         if (simRef?.current) simRef.current.updateViewpointParam(key, val);
       });

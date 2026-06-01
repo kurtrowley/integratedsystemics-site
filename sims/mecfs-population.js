@@ -711,34 +711,65 @@ export class MECFSPopulationSim {
   }
 
   _riskFactorRows(p, bar) {
-    const L = this.content?.detail?.labels || {};
-    const labels = this.content?.detail?.risk_factor_labels ||
-      ['Genetic susceptibility','Baseline stress / trauma','Prior conditions',
-       'Immune function (low)','Poor sleep quality','Economic stress',
-       'Pollution exposure','Social support (low)'];
-    const factors = [
-      [labels[0], p.susceptibility],
-      [labels[1], p.baselineStress],
-      [labels[2], p.priorConditions,     '#9a5030'],
-      [labels[3], 1 - p.immuneFunction,  '#c06030'],
-      [labels[4], 1 - p.sleepQuality,    '#c06030'],
-      [labels[5], p.economicStress,      '#c06030'],
-      [labels[6], p.pollutionExp,        '#8a6030'],
-      [labels[7], 1 - p.socialSupport,   '#8a6030'],
+    const L  = this.content?.detail?.labels || {};
+    const lb = this.content?.detail?.risk_factor_labels || [];
+    const g  = i => lb[i] || '';
+    const bool = v => bar(v ? 0.92 : 0.06, v ? '#c05030' : '#3a5a4a');
+
+    const sections = [
+      { heading: 'Core', rows: [
+        [g(0)||'Genetic susceptibility',     p.susceptibility],
+        [g(1)||'Chronic stress / trauma',    p.baselineStress],
+        [g(2)||'Pre-existing conditions',    p.priorConditions,  '#9a5030'],
+        [g(3)||'Immune function (low)',       1-p.immuneFunction, '#c06030'],
+        [g(4)||'Poor sleep quality',         1-p.sleepQuality,   '#c06030'],
+        [g(5)||'Economic stress',            p.economicStress,   '#c06030'],
+        [g(6)||'Pollution exposure',         p.pollutionExp,     '#8a6030'],
+        [g(7)||'Social support (low)',       1-p.socialSupport,  '#8a6030'],
+      ]},
+      { heading: 'Neurological', rows: [
+        [g(8) ||'Neurodivergence',           p.neurodivergence,             '#6a50a0'],
+        [g(9) ||'Emotional stress load',     p.emotionalStressLoad,         '#8a5080'],
+        [g(10)||'Brainstem load (structural)',p.mechanicalBrainstemLoad,    '#a04060'],
+      ]},
+      { heading: 'Systemic health', rows: [
+        [g(11)||'Digestive health (poor)',   p.digestiveHealth,             '#7a6030'],
+        [g(12)||'Metabolic health (poor)',   p.metabolicHealth,             '#8a5020'],
+        [g(13)||'Low fitness',               1-(p.generalFitness??0.5),    '#6a7030'],
+        [g(14)||'Poor diet quality',         1-(p.dietQuality??0.5),       '#6a6830'],
+      ]},
     ];
-    const rows = `<div class="detail-sub">${L.risk_factors||'Risk factors'}</div>` +
-      factors.map(([lbl,val,col='#3a8fa8']) =>
-        `<div class="factor-row"><span>${lbl}</span>${bar(val,col)}</div>`
-      ).join('');
 
-    // Show autonomic severity if person has been infected
-    const autoRow = p.autonomicAcute > 0
-      ? `<div class="detail-sub" style="margin-top:10px">${L.acute_factors||'Acute phase'}</div>
-         <div class="factor-row"><span>${L.autonomic_acute||'Autonomic involvement'}</span>${bar(p.autonomicAcute,'#c03060')}</div>
-         <div class="factor-row"><span>${L.illness_severity||'Illness severity'}</span>${bar(p.illnessSeverity,'#a04020')}</div>`
-      : '';
+    let html = '';
+    for (const sec of sections) {
+      html += `<div class="detail-sub" style="margin-top:6px">${sec.heading}</div>`;
+      for (const [lbl, val, col] of sec.rows)
+        html += `<div class="factor-row"><span>${lbl}</span>${bar(val, col||'#3a8fa8')}</div>`;
+    }
 
-    return rows + autoRow;
+    // Prior infection history as boolean pills
+    html += `<div class="detail-sub" style="margin-top:6px">Prior infections</div>`;
+    const viralHistory = [
+      ['EBV',        p.priorEBV],
+      ['HHV-6',      p.priorHHV6],
+      ['CMV',        p.priorCMV],
+      ['Lyme',       p.priorLyme],
+      ['Mycoplasma', p.priorMycoplasma],
+    ];
+    html += `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">` +
+      viralHistory.map(([name, val]) =>
+        `<span style="font-size:.72rem;padding:2px 8px;border-radius:999px;
+          background:${val ? 'rgba(192,80,48,.25)' : 'rgba(80,80,80,.15)'};
+          border:1px solid ${val ? 'rgba(192,80,48,.5)' : 'var(--line)'};
+          color:${val ? '#e08060' : 'var(--muted)'}">${name}</span>`
+      ).join('') + `</div>`;
+
+    if (p.autonomicAcute > 0) {
+      html += `<div class="detail-sub" style="margin-top:6px">${L.acute_factors||'Acute phase markers'}</div>
+        <div class="factor-row"><span>${L.autonomic_acute||'Autonomic involvement'}</span>${bar(p.autonomicAcute,'#c03060')}</div>
+        <div class="factor-row"><span>${L.illness_severity||'Illness severity'}</span>${bar(p.illnessSeverity,'#a04020')}</div>`;
+    }
+    return html;
   }
 
   _statusTextColor(status) {
