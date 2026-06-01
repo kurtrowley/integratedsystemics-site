@@ -182,13 +182,18 @@
     ]
   },
   "environment": {
+    "spread_section":    "Transmission dynamics",
     "stressors_section": "Societal stressors",
-    "footer_note": "Societal stressors shift individual CFS risk in real time — independently of pathogen type.",
+    "footer_note": "Transmission controls affect how the outbreak spreads. Societal stressors affect post-infection CFS risk independently.",
     "controls": [
-      {"key":"economicStress",       "label":"Economic stress",       "min":0,"max":1,"step":0.05,"default":0.3},
-      {"key":"pollution",            "label":"Pollution / toxin load","min":0,"max":1,"step":0.05,"default":0.3},
-      {"key":"healthcareAccess",     "label":"Healthcare access",     "min":0,"max":1,"step":0.05,"default":0.5},
-      {"key":"socialInfrastructure", "label":"Social infrastructure", "min":0,"max":1,"step":0.05,"default":0.5}
+      {"key":"socialContactLevel","label":"Social contact level",  "min":0,"max":1,"step":0.05,"default":0.6,
+       "section":"spread","note":"0 = isolated / distancing · 1 = dense / crowded. Scales effective contacts per person per day."},
+      {"key":"sanitationLevel",  "label":"Sanitation level",      "min":0,"max":1,"step":0.05,"default":0.5,
+       "section":"spread","note":"0 = poor (no handwashing, poor ventilation) · 1 = excellent. Reduces per-contact transmission probability."},
+      {"key":"economicStress",   "label":"Economic stress",        "min":0,"max":1,"step":0.05,"default":0.3,"section":"stressors"},
+      {"key":"pollution",        "label":"Pollution / toxin load", "min":0,"max":1,"step":0.05,"default":0.3,"section":"stressors"},
+      {"key":"healthcareAccess", "label":"Healthcare access",      "min":0,"max":1,"step":0.05,"default":0.5,"section":"stressors"},
+      {"key":"socialInfrastructure","label":"Social infrastructure","min":0,"max":1,"step":0.05,"default":0.5,"section":"stressors"}
     ]
   },
   "detail": {
