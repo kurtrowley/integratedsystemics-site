@@ -58,18 +58,37 @@ export function renderSimPage(c) {
     stressDiv.style.marginTop = '12px';
     stressDiv.innerHTML = `<h4>${c.environment.stressors_section}</h4>`;
 
+    // Build a section map from the controls
+    const sections = {};
     c.environment.controls.forEach(ctrl => {
+      const sec = ctrl.section;
+      if (!sections[sec]) {
+        let div;
+        if (sec === 'virus')    div = virusDiv;
+        else if (sec === 'pathogen') {
+          div = document.createElement('div');
+          div.className = 'env-section';
+          div.style.marginTop = '12px';
+          div.innerHTML = `<h4>${c.environment.pathogen_section || 'Pathogen type'}</h4>`;
+        }
+        else {
+          div = stressDiv;
+        }
+        sections[sec] = div;
+      }
       const row = document.createElement('div');
       row.className = 'env-row';
       row.innerHTML = `
         <label>${ctrl.label} <span id="v-${ctrl.key}">${ctrl.default}</span></label>
         <input type="range" data-env="${ctrl.key}"
                min="${ctrl.min}" max="${ctrl.max}"
-               step="${ctrl.step}" value="${ctrl.default}" />`;
-      (ctrl.section === 'virus' ? virusDiv : stressDiv).appendChild(row);
+               step="${ctrl.step}" value="${ctrl.default}" />
+        ${ctrl.note ? `<div style="font-size:.72rem;color:var(--muted);margin-top:2px;opacity:.7">${ctrl.note}</div>` : ''}`;
+      sections[sec].appendChild(row);
     });
-
+    // Append sections in order: virus, pathogen (if any), stressors
     envBody.appendChild(virusDiv);
+    if (sections.pathogen) envBody.appendChild(sections.pathogen);
     envBody.appendChild(stressDiv);
 
     const note = document.createElement('p');

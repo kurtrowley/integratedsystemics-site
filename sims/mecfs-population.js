@@ -73,16 +73,23 @@ class Person {
     this.economicStress   = Math.random();
     this.pollutionExp     = Math.random();
     this.socialSupport    = Math.random();
+    // Pre-existing conditions (autoimmune, metabolic, psychiatric history).
+    // Skewed low — not everyone has prior conditions; beta-like distribution approximated here.
+    this.priorConditions  = Math.random() < 0.30 ? Math.random() : Math.random() * 0.3;
+    // Autonomic severity during acute phase — assigned on infection, key predictor.
+    // Chicago mono study: autonomic symptoms during acute illness = strongest ME/CFS predictor.
+    this.autonomicAcute   = 0;  // set when infected
 
     // Viewpoint character: skewed toward typical at-risk profile to create tension
     if (isViewpoint) {
-      this.sex            = 'F';
-      this.age            = 25 + Math.floor(Math.random() * 20);
-      this.susceptibility = 0.45 + Math.random() * 0.45;
-      this.priorEBV       = true;
-      this.baselineStress = 0.35 + Math.random() * 0.45;
-      this.immuneFunction = 0.25 + Math.random() * 0.45;
-      this.sleepQuality   = 0.2  + Math.random() * 0.5;
+      this.sex             = 'F';
+      this.age             = 35 + Math.floor(Math.random() * 15); // peak risk band 35-64
+      this.susceptibility  = 0.45 + Math.random() * 0.45;
+      this.priorEBV        = true;
+      this.baselineStress  = 0.35 + Math.random() * 0.45;
+      this.immuneFunction  = 0.25 + Math.random() * 0.45;
+      this.sleepQuality    = 0.2  + Math.random() * 0.5;
+      this.priorConditions = 0.2  + Math.random() * 0.4;
     }
 
     // ── Simulation state ────────────────────────────────────────────
@@ -105,50 +112,45 @@ class Person {
   }
 
   // ── Research-based CFS probability ──────────────────────────────
-  // Sex-specific base rates are derived so that the population average
-  // (51% female × 2.3 relative risk) resolves to ~12% overall.
-  // Male base ≈ 7.2%, female base ≈ 16.5% (Reyes 1997; Jason 2006).
-  // Each subsequent factor is kept small so they don't compound to > 1.
+  // Uses an additive weighted risk score to avoid multiplicative compounding.
+  // Calibrated so: pathogenSeverity=0.0 → ~2–3% (influenza AHR data)
+  //                pathogenSeverity=0.5 → ~11–12% (Dubbo benchmark; Chicago mono)
+  //                pathogenSeverity=1.0 → ~24–27% (SARS Hong Kong 4-year follow-up)
+  // Weights set so the average person scores ≈ 0.50, giving p ≈ sex-specific base rate.
   _computeCFSRisk(severity, env) {
-    let p = this.sex === 'F' ? 0.165 : 0.072;
+    // Pathogen severity scales sex-specific base probability.
+    // Female base 15%, male base 6.5% — derived so population average (~11%) at default.
+    const pathogenMult = 0.20 + (env.pathogenSeverity ?? 0.5) * 1.60;
+    const base = (this.sex === 'F' ? 0.150 : 0.065) * pathogenMult;
 
-    // Illness severity: mild illness → 0.5×, severe → 1.5× (linear)
-    p *= (0.5 + severity);
+    // Additive factors — each weight calibrated so avg person scores ~0.5 total.
+    const ebvBonus = this.priorEBV ? 0.070 : 0;
+    const agePeak  = this.age >= 35 && this.age <= 64 ? 0.040 :
+                     this.age >= 25 && this.age < 35  ? 0.010 :
+                     this.age < 18                    ?-0.080 : 0;
+    const envAdj   = (env.economicStress      ?? 0.3) * 0.015
+                   + (env.pollution           ?? 0.3) * 0.010
+                   - (env.healthcareAccess    ?? 0.5) * 0.015
+                   - (env.socialInfrastructure?? 0.5) * 0.008;
 
-    // Prior EBV seropositivity — reactivation risk
-    if (this.priorEBV) p *= 1.18;
+    const score = Math.min(1,
+      severity              * 0.250 + // most replicated predictor (all studies)
+      this.autonomicAcute   * 0.200 + // Chicago mono: strongest single ME/CFS predictor
+      this.priorConditions  * 0.100 + // autoimmune/metabolic/psychiatric history
+      ebvBonus                       + // EBV reactivation risk
+      this.baselineStress   * 0.080 + // stress/trauma load (Wessely 1995)
+      this.susceptibility   * 0.060 + // HLA/genetic susceptibility
+      (1-this.sleepQuality) * 0.060 + // impaired immune clearance
+      (1-this.immuneFunction)*0.050 + // lower immune baseline
+      this.economicStress   * 0.040 + // delayed care, poor recovery conditions
+      this.pollutionExp     * 0.030 + // environmental toxin burden
+      (1-this.socialSupport)* 0.040 + // social support is protective (Buchwald 2000)
+      agePeak                        + // age peak 35–64 for Long COVID phenotype
+      envAdj
+    );
 
-    // Baseline stress / trauma load
-    p *= (1 + this.baselineStress * 0.35);
-
-    // Genetic / HLA susceptibility (ranges 0.85–1.15)
-    p *= (0.85 + this.susceptibility * 0.30);
-
-    // Poor sleep → impaired immune clearance
-    p *= (1.15 - this.sleepQuality * 0.20);
-
-    // Low immune function → higher risk (ranges 1.10–0.90)
-    p *= (1.10 - this.immuneFunction * 0.22);
-
-    // Economic stress → delayed care, poor rest conditions
-    p *= (1 + this.economicStress * 0.14);
-
-    // Pollution / environmental toxin burden
-    p *= (1 + this.pollutionExp * 0.09);
-
-    // Social support is protective (ranges 1.08–0.92)
-    p *= (1.08 - this.socialSupport * 0.16);
-
-    // Age peak 25–50; children have substantially lower risk
-    p *= this.age >= 25 && this.age <= 50 ? 1.12 :
-         this.age < 18 ? 0.35 : 0.88;
-
-    // Societal stressors from environment controls (clamped ±20%)
-    const envDelta = env.economicStress * 0.10 + env.pollution * 0.07
-                   - env.healthcareAccess * 0.09 - env.socialInfrastructure * 0.04;
-    p *= Math.max(0.80, Math.min(1.20, 1 + envDelta));
-
-    return Math.min(Math.max(p, 0.01), 0.88);
+    // p = base × (0.4 + score × 1.2): average score=0.5 → multiplier=1.0 → p=base
+    return Math.min(Math.max(base * (0.40 + score * 1.20), 0.01), 0.92);
   }
 
   expose(day) {
@@ -166,8 +168,12 @@ class Person {
         if (day >= this.infectDay) {
           this.status          = STATUS.INFECTIOUS;
           this.illnessSeverity = 0.15 + Math.random() * 0.85;
+          // Autonomic severity during acute phase: correlated with severity
+          // but independently variable. Chicago mono study: this is the
+          // strongest single predictor of ME/CFS conversion.
+          this.autonomicAcute  = Math.min(1, this.illnessSeverity * (0.4 + Math.random() * 0.8));
           this.cfsRisk         = this._computeCFSRisk(this.illnessSeverity, env);
-          this.acuteEndDay     = day + 7 + Math.floor(Math.random() * 8); // 7–14d infectious
+          this.acuteEndDay     = day + 7 + Math.floor(Math.random() * 8);
           this._transitionColor();
         }
         break;
@@ -175,7 +181,6 @@ class Person {
       case STATUS.INFECTIOUS:
         if (day >= this.acuteEndDay) {
           this.status = STATUS.RECOVERING;
-          // Determine outcome at end of acute phase
           const r = Math.random();
           if (r < this.cfsRisk) {
             const severe     = Math.random() < (this.cfsRisk > 0.55 ? 0.45 : 0.2);
@@ -203,6 +208,25 @@ class Person {
         } else if (!this.cfsDay && day >= (this.acuteEndDay + 21 + Math.floor(Math.random()*14))) {
           this.status  = STATUS.RECOVERED;
           this._transitionColor();
+        }
+        break;
+
+      case STATUS.LONG_COVID:
+        // Gradual recovery following the decay curve observed in Dubbo/Chicago studies:
+        // ~40–46% of Long COVID cases recover per 6-month window.
+        // p(recovery/day) ≈ 0.003 → median recovery ~8 months;
+        // modulated by immune function, social support, and stress load.
+        // ME/CFS cases (hasCFS) do NOT recover in this model — they represent
+        // the hard floor that persists at 4% of originally infected at 24 months.
+        {
+          const pRecov = Math.max(0.0005,
+            (0.003 + this.immuneFunction * 0.002 - this.baselineStress * 0.001)
+            * (0.5 + this.socialSupport * 0.5));
+          if (Math.random() < pRecov) {
+            this.status = STATUS.RECOVERED;
+            this.symptoms = null;
+            this._transitionColor();
+          }
         }
         break;
     }
@@ -273,6 +297,7 @@ export class MECFSPopulationSim {
 
     this.env = {
       r0:                  3.0,
+      pathogenSeverity:    0.5,  // 0=influenza-like, 0.5=EBV/COVID moderate, 1.0=SARS-like
       economicStress:      0.3,
       pollution:           0.3,
       healthcareAccess:    0.5,
@@ -620,21 +645,32 @@ export class MECFSPopulationSim {
   _riskFactorRows(p, bar) {
     const L = this.content?.detail?.labels || {};
     const labels = this.content?.detail?.risk_factor_labels ||
-      ['Genetic susceptibility','Baseline stress / trauma','Immune function (low)',
-       'Poor sleep quality','Economic stress','Pollution exposure','Social support (low)'];
+      ['Genetic susceptibility','Baseline stress / trauma','Prior conditions',
+       'Immune function (low)','Poor sleep quality','Economic stress',
+       'Pollution exposure','Social support (low)'];
     const factors = [
       [labels[0], p.susceptibility],
       [labels[1], p.baselineStress],
-      [labels[2], 1 - p.immuneFunction, '#c06030'],
-      [labels[3], 1 - p.sleepQuality,   '#c06030'],
-      [labels[4], p.economicStress,      '#c06030'],
-      [labels[5], p.pollutionExp,        '#8a6030'],
-      [labels[6], 1 - p.socialSupport,   '#8a6030'],
+      [labels[2], p.priorConditions,     '#9a5030'],
+      [labels[3], 1 - p.immuneFunction,  '#c06030'],
+      [labels[4], 1 - p.sleepQuality,    '#c06030'],
+      [labels[5], p.economicStress,      '#c06030'],
+      [labels[6], p.pollutionExp,        '#8a6030'],
+      [labels[7], 1 - p.socialSupport,   '#8a6030'],
     ];
-    return `<div class="detail-sub">${L.risk_factors||'Risk factors'}</div>` +
+    const rows = `<div class="detail-sub">${L.risk_factors||'Risk factors'}</div>` +
       factors.map(([lbl,val,col='#3a8fa8']) =>
         `<div class="factor-row"><span>${lbl}</span>${bar(val,col)}</div>`
       ).join('');
+
+    // Show autonomic severity if person has been infected
+    const autoRow = p.autonomicAcute > 0
+      ? `<div class="detail-sub" style="margin-top:10px">${L.acute_factors||'Acute phase'}</div>
+         <div class="factor-row"><span>${L.autonomic_acute||'Autonomic involvement'}</span>${bar(p.autonomicAcute,'#c03060')}</div>
+         <div class="factor-row"><span>${L.illness_severity||'Illness severity'}</span>${bar(p.illnessSeverity,'#a04020')}</div>`
+      : '';
+
+    return rows + autoRow;
   }
 
   _statusTextColor(status) {
