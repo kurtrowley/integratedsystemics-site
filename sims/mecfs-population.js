@@ -64,32 +64,54 @@ class Person {
     const pool = this.sex === 'F' ? NF : NM;
     this.name = isViewpoint ? 'You' : pool[Math.floor(Math.random() * pool.length)];
 
-    // ── Risk factors (0–1) based on epidemiological distributions ──
-    this.susceptibility   = Math.random();             // HLA/genetic score
-    this.priorEBV         = Math.random() < 0.90;      // 90% adults seropositive
-    this.baselineStress   = Math.random();             // prior stress/trauma load
-    this.immuneFunction   = 0.35 + Math.random() * 0.65;
-    this.sleepQuality     = Math.random();
-    this.economicStress   = Math.random();
-    this.pollutionExp     = Math.random();
-    this.socialSupport    = Math.random();
-    // Pre-existing conditions (autoimmune, metabolic, psychiatric history).
-    // Skewed low — not everyone has prior conditions; beta-like distribution approximated here.
-    this.priorConditions  = Math.random() < 0.30 ? Math.random() : Math.random() * 0.3;
-    // Autonomic severity during acute phase — assigned on infection, key predictor.
-    // Chicago mono study: autonomic symptoms during acute illness = strongest ME/CFS predictor.
-    this.autonomicAcute   = 0;  // set when infected
+    // ── Core risk factors ───────────────────────────────────────────
+    this.susceptibility       = Math.random();
+    this.priorEBV             = Math.random() < 0.90;
+    this.baselineStress       = Math.random();
+    this.immuneFunction       = 0.35 + Math.random() * 0.65;
+    this.sleepQuality         = Math.random();
+    this.economicStress       = Math.random();
+    this.pollutionExp         = Math.random();
+    this.socialSupport        = Math.random();
+    this.priorConditions      = Math.random() < 0.30 ? Math.random() : Math.random() * 0.3;
 
-    // Viewpoint character: skewed toward typical at-risk profile to create tension
+    // ── Neurological profile ────────────────────────────────────────
+    // ~18% significant neurodivergence (ADHD ~10%, autism ~3%, other ~5%)
+    this.neurodivergence      = Math.random() < 0.18 ? 0.35 + Math.random() * 0.65 : Math.random() * 0.2;
+    // Ongoing emotional stress load (distinct from accumulated trauma history)
+    this.emotionalStressLoad  = Math.random();
+    // Mechanical brainstem load: Chiari, CCI, upper cervical — rare but high-impact
+    this.mechanicalBrainstemLoad = Math.random() < 0.07 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.12;
+
+    // ── Systemic health ─────────────────────────────────────────────
+    this.digestiveHealth      = Math.random() < 0.20 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.4;
+    this.metabolicHealth      = Math.random() < 0.25 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.4;
+    this.generalFitness       = Math.random();  // 0=poor, 1=excellent (protective when high)
+    this.dietQuality          = Math.random();  // 0=poor, 1=excellent (protective when high)
+
+    // ── Prior infection history ─────────────────────────────────────
+    this.priorHHV6            = Math.random() < 0.95;
+    this.priorCMV             = Math.random() < 0.60;
+    this.priorLyme            = Math.random() < 0.08;
+    this.priorMycoplasma      = Math.random() < 0.30;
+
+    // Assigned when infected (not a pre-existing factor)
+    this.autonomicAcute       = 0;
+
+    // Viewpoint character: skewed toward at-risk profile for narrative tension
     if (isViewpoint) {
-      this.sex             = 'F';
-      this.age             = 35 + Math.floor(Math.random() * 15); // peak risk band 35-64
-      this.susceptibility  = 0.45 + Math.random() * 0.45;
-      this.priorEBV        = true;
-      this.baselineStress  = 0.35 + Math.random() * 0.45;
-      this.immuneFunction  = 0.25 + Math.random() * 0.45;
-      this.sleepQuality    = 0.2  + Math.random() * 0.5;
-      this.priorConditions = 0.2  + Math.random() * 0.4;
+      this.sex                    = 'F';
+      this.age                    = 35 + Math.floor(Math.random() * 15);
+      this.susceptibility         = 0.45 + Math.random() * 0.45;
+      this.priorEBV               = true;
+      this.priorHHV6              = true;
+      this.baselineStress         = 0.35 + Math.random() * 0.45;
+      this.emotionalStressLoad    = 0.30 + Math.random() * 0.45;
+      this.immuneFunction         = 0.25 + Math.random() * 0.45;
+      this.sleepQuality           = 0.20 + Math.random() * 0.50;
+      this.priorConditions        = 0.15 + Math.random() * 0.40;
+      this.digestiveHealth        = 0.20 + Math.random() * 0.50;
+      this.neurodivergence        = Math.random() < 0.25 ? 0.3 + Math.random() * 0.5 : Math.random() * 0.2;
     }
 
     // ── Simulation state ────────────────────────────────────────────
@@ -119,37 +141,56 @@ class Person {
   // Weights set so the average person scores ≈ 0.50, giving p ≈ sex-specific base rate.
   _computeCFSRisk(severity, env) {
     // Pathogen severity scales sex-specific base probability.
-    // Female base 15%, male base 6.5% — derived so population average (~11%) at default.
+    // Female base 15%, male base 6.5% → population average ~11% at pathogenSeverity=0.5.
     const pathogenMult = 0.20 + (env.pathogenSeverity ?? 0.5) * 1.60;
     const base = (this.sex === 'F' ? 0.150 : 0.065) * pathogenMult;
 
-    // Additive factors — each weight calibrated so avg person scores ~0.5 total.
-    const ebvBonus = this.priorEBV ? 0.070 : 0;
+    // Prior viral history bonus
+    const priorViralBonus =
+      (this.priorHHV6       ? 0.035 : 0) +  // HHV-6 reactivation risk
+      (this.priorCMV        ? 0.025 : 0) +  // cumulative herpesvirus burden
+      (this.priorLyme       ? 0.070 : 0) +  // PTLDS/ME/CFS overlap (strong)
+      (this.priorMycoplasma ? 0.035 : 0);   // Nicolson: elevated in ME/CFS
+
     const agePeak  = this.age >= 35 && this.age <= 64 ? 0.040 :
                      this.age >= 25 && this.age < 35  ? 0.010 :
                      this.age < 18                    ?-0.080 : 0;
-    const envAdj   = (env.economicStress      ?? 0.3) * 0.015
-                   + (env.pollution           ?? 0.3) * 0.010
-                   - (env.healthcareAccess    ?? 0.5) * 0.015
-                   - (env.socialInfrastructure?? 0.5) * 0.008;
+    const envAdj   = (env.economicStress      ?? 0.3) * 0.012
+                   + (env.pollution           ?? 0.3) * 0.008
+                   - (env.healthcareAccess    ?? 0.5) * 0.012
+                   - (env.socialInfrastructure?? 0.5) * 0.006;
 
-    const score = Math.min(1,
-      severity              * 0.250 + // most replicated predictor (all studies)
-      this.autonomicAcute   * 0.200 + // Chicago mono: strongest single ME/CFS predictor
-      this.priorConditions  * 0.100 + // autoimmune/metabolic/psychiatric history
-      ebvBonus                       + // EBV reactivation risk
-      this.baselineStress   * 0.080 + // stress/trauma load (Wessely 1995)
-      this.susceptibility   * 0.060 + // HLA/genetic susceptibility
-      (1-this.sleepQuality) * 0.060 + // impaired immune clearance
-      (1-this.immuneFunction)*0.050 + // lower immune baseline
-      this.economicStress   * 0.040 + // delayed care, poor recovery conditions
-      this.pollutionExp     * 0.030 + // environmental toxin burden
-      (1-this.socialSupport)* 0.040 + // social support is protective (Buchwald 2000)
-      agePeak                        + // age peak 35–64 for Long COVID phenotype
-      envAdj
-    );
+    // Raw additive score — all weights calibrated so average person scores ~0.674.
+    // After normalization (÷1.35) this maps to ~0.50, keeping p ≈ base rate.
+    const rawScore =
+      severity                    * 0.250 + // most replicated predictor (all studies)
+      this.autonomicAcute         * 0.200 + // Chicago mono: strongest single predictor
+      this.priorConditions        * 0.100 + // prior autoimmune/metabolic/psychiatric
+      (this.priorEBV ? 0.063 : 0)         + // EBV seropositivity / reactivation risk
+      this.baselineStress         * 0.080 + // accumulated stress/trauma (Wessely 1995)
+      this.susceptibility         * 0.060 + // HLA/genetic susceptibility
+      (1 - this.sleepQuality)     * 0.060 + // impaired immune clearance
+      (1 - this.immuneFunction)   * 0.050 + // lower immune baseline
+      this.economicStress         * 0.040 + // delayed care, poor recovery conditions
+      this.pollutionExp           * 0.030 + // environmental toxin burden
+      (1 - this.socialSupport)    * 0.040 + // social support protective (Buchwald 2000)
+      // ── Neurological profile ─────────────────────────────────────
+      this.neurodivergence        * 0.040 + // ANS dysregulation in ADHD/autism
+      this.emotionalStressLoad    * 0.060 + // ongoing HPA axis priming
+      this.mechanicalBrainstemLoad* 0.080 + // structural brainstem compression
+      // ── Systemic health ──────────────────────────────────────────
+      this.digestiveHealth        * 0.045 + // gut-brain axis dysfunction
+      this.metabolicHealth        * 0.050 + // mitochondrial/metabolic compromise
+      (1 - this.generalFitness)   * 0.030 + // lower fitness → reduced immune resilience
+      (1 - this.dietQuality)      * 0.025 + // inflammatory diet burden
+      // ── Prior viral history ───────────────────────────────────────
+      priorViralBonus                      +
+      agePeak                              +
+      envAdj;
 
-    // p = base × (0.4 + score × 1.2): average score=0.5 → multiplier=1.0 → p=base
+    // Normalize: avg rawScore ≈ 0.674 → ÷1.35 → 0.50 → multiplier 1.0 → p = base
+    const score = Math.min(1, rawScore / 1.35);
+
     return Math.min(Math.max(base * (0.40 + score * 1.20), 0.01), 0.92);
   }
 
@@ -393,8 +434,36 @@ export class MECFSPopulationSim {
   }
 
   _spread() {
+    const mode = this.env.transmission || 'respiratory';
+
+    if (mode === 'environmental') {
+      // Environmental / vector-borne exposure: on days 1–3 expose community members
+      // directly, simulating a community-wide event (mold bloom, chemical spill, etc.)
+      if (this.day <= 3) {
+        const pExpose = Math.min(0.95, 0.55 + this.env.pollution * 0.25);
+        for (const p of this.population) {
+          if (p.status === STATUS.HEALTHY && Math.random() < pExpose) {
+            p.expose(this.day);
+          }
+        }
+      }
+      this.flashes = this.flashes.filter(f => f.t-- > 0);
+      return;
+    }
+
+    if (mode === 'mixed') {
+      // Natural disaster: environmental exposure on day 1 + some person-to-person
+      if (this.day <= 2) {
+        for (const p of this.population) {
+          if (p.status === STATUS.HEALTHY && Math.random() < 0.45) p.expose(this.day);
+        }
+      }
+    }
+
+    // Standard person-to-person transmission (respiratory / contact)
     const contagious = this.population.filter(p => p.isContagious);
-    const pPerContact = this.env.r0 / (8 * 11); // 8 Moore neighbours, ~11d infectious
+    if (!contagious.length) { this.flashes = this.flashes.filter(f => f.t-- > 0); return; }
+    const pPerContact = (this.env.r0 || 3) / (8 * 11);
 
     for (const inf of contagious) {
       const neighbors = this._neighbors(inf);
@@ -404,7 +473,6 @@ export class MECFSPopulationSim {
                                        * (1 + this.env.pollution * 0.1);
         if (Math.random() < pTransmit) {
           if (nb.expose(this.day)) {
-            // Record flash
             const a = this._personPos(inf);
             const b = this._personPos(nb);
             this.flashes.push({ x1:a.x, y1:a.y, x2:b.x, y2:b.y, t:18 });
@@ -708,11 +776,84 @@ export class MECFSPopulationSim {
 
   setEnv(key, val) {
     this.env[key] = +val;
-    // Recompute cfsRisk for all already-infected people not yet resolved
     for (const p of this.population) {
       if (p.isInfected && p.illnessSeverity > 0)
         p.cfsRisk = p._computeCFSRisk(p.illnessSeverity, this.env);
     }
+  }
+
+  // Apply a full outbreak preset (from the outbreak selector)
+  setOutbreak(ob) {
+    this.env.r0              = ob.r0 ?? 3.0;
+    this.env.pathogenSeverity= ob.pathogenSeverity ?? 0.5;
+    this.env.transmission    = ob.transmission ?? 'respiratory';
+    this._init(); // reset population with new parameters
+  }
+
+  // Update viewpoint character's parameters in real time
+  updateViewpointParam(key, val) {
+    const vp = this.population.find(p => p.isViewpoint);
+    if (!vp) return;
+    const boolKeys = ['priorEBV','priorHHV6','priorCMV','priorLyme','priorMycoplasma'];
+    if (key === 'sex')           vp.sex = val;
+    else if (key === 'age')      vp.age = Math.round(+val);
+    else if (boolKeys.includes(key)) vp[key] = val; // already boolean from render
+    else                         vp[key] = +val;
+    if (vp.cfsRisk > 0) vp.cfsRisk = vp._computeCFSRisk(vp.illnessSeverity || 0.5, this.env);
+    this._updateDetail();
+  }
+
+  getViewpointParams() {
+    const vp = this.population.find(p => p.isViewpoint);
+    if (!vp) return null;
+    return {
+      age: vp.age, sex: vp.sex,
+      // core
+      baselineStress: vp.baselineStress, sleepQuality: vp.sleepQuality,
+      immuneFunction: vp.immuneFunction, susceptibility: vp.susceptibility,
+      priorConditions: vp.priorConditions, economicStress: vp.economicStress,
+      socialSupport: vp.socialSupport,
+      // neurological
+      neurodivergence: vp.neurodivergence, emotionalStressLoad: vp.emotionalStressLoad,
+      mechanicalBrainstemLoad: vp.mechanicalBrainstemLoad,
+      // systemic
+      digestiveHealth: vp.digestiveHealth, metabolicHealth: vp.metabolicHealth,
+      generalFitness: vp.generalFitness, dietQuality: vp.dietQuality,
+      // prior infections
+      priorEBV: vp.priorEBV, priorHHV6: vp.priorHHV6,
+      priorCMV: vp.priorCMV, priorLyme: vp.priorLyme, priorMycoplasma: vp.priorMycoplasma,
+    };
+  }
+
+  randomiseViewpoint() {
+    const vp = this.population.find(p => p.isViewpoint);
+    if (!vp) return;
+    // Core
+    vp.susceptibility          = Math.random();
+    vp.baselineStress          = Math.random();
+    vp.sleepQuality            = Math.random();
+    vp.immuneFunction          = 0.25 + Math.random() * 0.65;
+    vp.economicStress          = Math.random();
+    vp.socialSupport           = Math.random();
+    vp.priorConditions         = Math.random() < 0.35 ? Math.random() : Math.random() * 0.35;
+    vp.age                     = 18 + Math.floor(Math.random() * 57);
+    vp.sex                     = Math.random() < 0.5 ? 'F' : 'M';
+    // Neurological
+    vp.neurodivergence         = Math.random() < 0.18 ? 0.35 + Math.random() * 0.65 : Math.random() * 0.2;
+    vp.emotionalStressLoad     = Math.random();
+    vp.mechanicalBrainstemLoad = Math.random() < 0.07 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.12;
+    // Systemic
+    vp.digestiveHealth         = Math.random() < 0.20 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.4;
+    vp.metabolicHealth         = Math.random() < 0.25 ? 0.4 + Math.random() * 0.6 : Math.random() * 0.4;
+    vp.generalFitness          = Math.random();
+    vp.dietQuality             = Math.random();
+    // Prior infections
+    vp.priorEBV                = Math.random() < 0.90;
+    vp.priorHHV6               = Math.random() < 0.95;
+    vp.priorCMV                = Math.random() < 0.60;
+    vp.priorLyme               = Math.random() < 0.08;
+    vp.priorMycoplasma         = Math.random() < 0.30;
+    this._updateDetail();
   }
 
   resize(w, h) {

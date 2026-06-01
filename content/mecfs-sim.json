@@ -1,96 +1,192 @@
 {
-  "site": {
-    "brand": "Integrated Systemics",
-    "brand_short": "IS"
-  },
+  "site": { "brand": "Integrated Systemics", "brand_short": "IS" },
   "page": {
     "title": "ME/CFS Outbreak Simulator — Integrated Systemics",
     "breadcrumb": "ME/CFS Outbreak Simulator"
   },
-  "toolbar": {
-    "hint": "Click any person to inspect · Yellow ring = You"
-  },
+  "toolbar": { "hint": "Click any person to inspect · Yellow ring = You" },
   "stats_labels": {
-    "day":         "Day",
-    "healthy":     "Healthy",
-    "active":      "Active cases",
-    "recovered":   "Recovered",
-    "long_covid":  "Long COVID",
-    "cfs":         "ME/CFS",
-    "cfs_rate":    "CFS rate",
-    "severe_cfs":  "Severe CFS"
+    "day":"Day","healthy":"Healthy","active":"Active cases",
+    "recovered":"Recovered","long_covid":"Long COVID",
+    "cfs":"ME/CFS","cfs_rate":"CFS rate","severe_cfs":"Severe CFS"
   },
   "status_labels": {
-    "healthy":    "Healthy",
-    "exposed":    "Exposed",
-    "infectious": "Infectious (acute)",
-    "recovering": "Recovering",
-    "recovered":  "Fully recovered",
-    "long_covid": "Long COVID / PVFS",
-    "cfs":        "ME/CFS",
-    "severe_cfs": "Severe ME/CFS"
+    "healthy":"Healthy","exposed":"Exposed","infectious":"Infectious (acute)",
+    "recovering":"Recovering","recovered":"Fully recovered",
+    "long_covid":"Long COVID / PVFS","cfs":"ME/CFS","severe_cfs":"Severe ME/CFS"
   },
   "legend": [
-    { "color": "#324a5a", "label": "Healthy" },
-    { "color": "#b8a030", "label": "Exposed" },
-    { "color": "#d4501e", "label": "Infectious" },
-    { "color": "#648c46", "label": "Recovering" },
-    { "color": "#329668", "label": "Fully recovered" },
-    { "color": "#c07828", "label": "Long COVID / PVFS" },
-    { "color": "#8c1c3a", "label": "ME/CFS" },
-    { "color": "#460618", "label": "Severe ME/CFS" }
+    {"color":"#324a5a","label":"Healthy"},
+    {"color":"#b8a030","label":"Exposed"},
+    {"color":"#d4501e","label":"Infectious"},
+    {"color":"#648c46","label":"Recovering"},
+    {"color":"#329668","label":"Fully recovered"},
+    {"color":"#c07828","label":"Long COVID / PVFS"},
+    {"color":"#8c1c3a","label":"ME/CFS"},
+    {"color":"#460618","label":"Severe ME/CFS"}
   ],
+  "outbreaks": [
+    {
+      "id":"covid19","label":"COVID-19","category":"Respiratory virus",
+      "r0":3.5,"pathogenSeverity":0.45,"transmission":"respiratory",
+      "desc":"10–20% long COVID; ME/CFS subset ~2–3% of infections. Most extensively studied post-viral syndrome in history."
+    },
+    {
+      "id":"sars2003","label":"SARS (2003)","category":"Respiratory virus",
+      "r0":3.0,"pathogenSeverity":1.0,"transmission":"respiratory",
+      "desc":"27% ME/CFS at 4-year follow-up (Hong Kong cohort). Highest documented post-viral CFS rate for a respiratory virus."
+    },
+    {
+      "id":"ebv","label":"EBV / Mono","category":"Viral",
+      "r0":1.8,"pathogenSeverity":0.55,"transmission":"contact",
+      "desc":"Dubbo study: 11% ME/CFS at 6 months regardless of pathogen. Primary trigger for classical ME/CFS pre-COVID."
+    },
+    {
+      "id":"h1n1","label":"H1N1 (2009)","category":"Respiratory virus",
+      "r0":2.5,"pathogenSeverity":0.28,"transmission":"respiratory",
+      "desc":"AHR 2.04 for persistent fatigue, strongest in adults under 30. First pandemic to generate large-scale post-viral longitudinal data."
+    },
+    {
+      "id":"influenza","label":"Influenza (seasonal)","category":"Respiratory virus",
+      "r0":2.5,"pathogenSeverity":0.15,"transmission":"respiratory",
+      "desc":"AHR 1.51 for ME/CFS vs matched controls across 20-year population study. 41% post-infection fatigue in meta-analysis."
+    },
+    {
+      "id":"qfever","label":"Q Fever","category":"Bacterial",
+      "r0":0,"pathogenSeverity":0.55,"transmission":"environmental",
+      "desc":"Dubbo cohort: 11% ME/CFS at 6 months. Post-Q-Fever fatigue syndrome well-characterised; Coxiella burnetii."
+    },
+    {
+      "id":"ross_river","label":"Ross River Virus","category":"Viral (vector)",
+      "r0":0,"pathogenSeverity":0.50,"transmission":"environmental",
+      "desc":"Dubbo cohort original trigger. ~30% persistent arthralgia and fatigue at 6 months."
+    },
+    {
+      "id":"dengue","label":"Dengue Fever","category":"Viral (vector)",
+      "r0":0,"pathogenSeverity":0.75,"transmission":"environmental",
+      "desc":"Up to 82% persistent fatigue reported. Severe post-dengue syndrome including cognitive impairment."
+    },
+    {
+      "id":"west_nile","label":"West Nile Virus","category":"Viral (vector)",
+      "r0":0,"pathogenSeverity":0.45,"transmission":"environmental",
+      "desc":"31% persistent fatigue at follow-up. Neurological sequelae including encephalitis overlap with ME/CFS phenotype."
+    },
+    {
+      "id":"lyme","label":"Lyme Disease","category":"Bacterial (tick)",
+      "r0":0,"pathogenSeverity":0.60,"transmission":"environmental",
+      "desc":"Post-Treatment Lyme Disease Syndrome (PTLDS) in 10–20% of treated patients. Fatigue, cognitive difficulty, pain; significant ME/CFS overlap."
+    },
+    {
+      "id":"ebola","label":"Ebola (post-infection)","category":"Viral",
+      "r0":1.8,"pathogenSeverity":0.35,"transmission":"contact",
+      "desc":"9–28% persistent fatigue in survivors. Sequelae include arthralgia, uveitis, neurological effects. Post-Ebola syndrome formally recognised."
+    },
+    {
+      "id":"mold","label":"Mold / Mycotoxin","category":"Environmental",
+      "r0":0,"pathogenSeverity":0.50,"transmission":"environmental",
+      "desc":"Post-monsoon or flooding mold bloom. Mycotoxin-driven systemic inflammation mimics ME/CFS; cognitive impairment, fatigue, and immune dysregulation."
+    },
+    {
+      "id":"wildfire","label":"Wildfire / Retardant","category":"Environmental",
+      "r0":0,"pathogenSeverity":0.48,"transmission":"environmental",
+      "desc":"Fine particulate (PM2.5) plus fire retardant chemical exposure. Combined oxidative stress and immune disruption; long-term respiratory and neurological sequelae."
+    },
+    {
+      "id":"chemical","label":"Chemical Spill","category":"Environmental",
+      "r0":0,"pathogenSeverity":0.55,"transmission":"environmental",
+      "desc":"Organophosphate or industrial chemical exposure. Gulf War Illness is the canonical post-chemical ME/CFS-like syndrome; documented in multiple industrial incidents."
+    },
+    {
+      "id":"disaster","label":"Natural Disaster","category":"Environmental",
+      "r0":0.5,"pathogenSeverity":0.30,"transmission":"mixed",
+      "desc":"Stress-mediated immunosuppression plus displacement, contaminated water, secondary infections. Elevated post-disaster CFS incidence documented post-Katrina and similar events."
+    }
+  ],
+  "you_profile": {
+    "heading": "Your profile",
+    "description": "Set your character's baseline before the outbreak. These factors determine how your risk compares to others in the community.",
+    "reset_label": "Randomise",
+    "fields": [
+      {"type":"section_header","label":"Demographics"},
+      {"key":"age",                 "label":"Age",                         "type":"range",  "min":18,"max":74,"step":1,   "default":38},
+      {"key":"sex",                 "label":"Biological sex",              "type":"toggle", "options":["Female","Male"],  "default":"F"},
+
+      {"type":"section_header","label":"Neurological profile"},
+      {"key":"neurodivergence",     "label":"Neurodivergence",             "type":"range",  "min":0,"max":1,"step":0.05, "default":0.1,
+       "note":"ADHD / autism / dyslexia. Elevated ANS dysregulation and ME/CFS rates documented across multiple cohorts."},
+      {"key":"emotionalStressLoad", "label":"Emotional stress load",       "type":"range",  "min":0,"max":1,"step":0.05, "default":0.35,
+       "note":"Ongoing emotional burden (distinct from baseline trauma history). Primes HPA axis reactivity."},
+      {"key":"mechanicalBrainstemLoad","label":"Mechanical brainstem load","type":"range",  "min":0,"max":1,"step":0.05, "default":0.0,
+       "note":"0 = none · 0.5 = cervical / postural issues · 1 = Chiari malformation or craniocervical instability. Direct brainstem compression is an emerging ME/CFS co-factor (Henderson, Bolognese)."},
+
+      {"type":"section_header","label":"Systemic health"},
+      {"key":"digestiveHealth",     "label":"Digestive health (poor)",     "type":"range",  "min":0,"max":1,"step":0.05, "default":0.3,
+       "note":"IBS, gut permeability, dysbiosis. ME/CFS co-morbidity: 50–80%. Gut-brain axis disruption is mechanistically implicated."},
+      {"key":"metabolicHealth",     "label":"Metabolic health (poor)",     "type":"range",  "min":0,"max":1,"step":0.05, "default":0.2,
+       "note":"Mitochondrial dysfunction, insulin resistance, thyroid conditions. Naviaux metabolic model implicates cellular energy metabolism."},
+      {"key":"generalFitness",      "label":"General fitness (low)",       "type":"range",  "min":0,"max":1,"step":0.05, "default":0.4,
+       "note":"Baseline physical condition and exercise capacity. Lower fitness reduces immune resilience and post-infection recovery."},
+      {"key":"dietQuality",         "label":"Diet quality (poor)",         "type":"range",  "min":0,"max":1,"step":0.05, "default":0.35,
+       "note":"Nutrient density, microbiome support, inflammatory load. Poor diet amplifies immune dysregulation."},
+      {"key":"baselineStress",      "label":"Chronic stress / trauma load","type":"range",  "min":0,"max":1,"step":0.05, "default":0.5,
+       "note":"Accumulated prior stress and trauma. Distinct from current emotional load — reflects the longer-term baseline. Wessely et al. 1995."},
+      {"key":"sleepQuality",        "label":"Sleep quality",               "type":"range",  "min":0,"max":1,"step":0.05, "default":0.5},
+      {"key":"immuneFunction",      "label":"Immune function",             "type":"range",  "min":0,"max":1,"step":0.05, "default":0.55},
+      {"key":"susceptibility",      "label":"Genetic susceptibility",      "type":"range",  "min":0,"max":1,"step":0.05, "default":0.5,
+       "note":"HLA gene associations, SNPs affecting immune regulation. Proxy for inherited predisposition."},
+      {"key":"priorConditions",     "label":"Pre-existing conditions",     "type":"range",  "min":0,"max":1,"step":0.05, "default":0.2,
+       "note":"Autoimmune, psychiatric, or metabolic conditions prior to this infection."},
+      {"key":"economicStress",      "label":"Economic stress",             "type":"range",  "min":0,"max":1,"step":0.05, "default":0.3},
+      {"key":"socialSupport",       "label":"Social support",              "type":"range",  "min":0,"max":1,"step":0.05, "default":0.5},
+
+      {"type":"section_header","label":"Prior infection history"},
+      {"key":"priorEBV",            "label":"Epstein-Barr Virus (EBV)",    "type":"toggle", "options":["Yes","No"],       "default":true,
+       "note":"~90% adult seropositivity. Primary classical ME/CFS trigger. Reactivation risk compounds with additional infections."},
+      {"key":"priorHHV6",           "label":"HHV-6",                       "type":"toggle", "options":["Yes","No"],       "default":true,
+       "note":"~95% adult seropositivity. HHV-6 reactivation documented in ME/CFS; HHV-6B strain specifically implicated."},
+      {"key":"priorCMV",            "label":"Cytomegalovirus (CMV)",       "type":"toggle", "options":["Yes","No"],       "default":false,
+       "note":"~60% adult seropositivity. Compounds cumulative herpesvirus immune burden."},
+      {"key":"priorLyme",           "label":"Lyme Disease (Borrelia)",     "type":"toggle", "options":["Yes","No"],       "default":false,
+       "note":"Post-Treatment Lyme Disease Syndrome (PTLDS) has strong ME/CFS overlap. Prior Lyme significantly elevates post-viral syndrome risk."},
+      {"key":"priorMycoplasma",     "label":"Mycoplasma",                  "type":"toggle", "options":["Yes","No"],       "default":false,
+       "note":"Mycoplasma pneumoniae / fermentans. Nicolson et al.: elevated prevalence in ME/CFS. Adds to cumulative infection burden."}
+    ]
+  },
   "environment": {
-    "virus_section":     "Virus parameters",
-    "pathogen_section":  "Pathogen type",
     "stressors_section": "Societal stressors",
-    "footer_note": "Environmental and pathogen parameters shift individual CFS risk in real time. Pathogen severity scales base rates from influenza-like (~3% ME/CFS) to SARS-like (~27%). Societal stressors modulate outcomes independently.",
+    "footer_note": "Societal stressors shift individual CFS risk in real time — independently of pathogen type.",
     "controls": [
-      { "key": "r0",                   "label": "Transmissibility (R₀)",    "min": 0.5, "max": 8,   "step": 0.1,  "default": 3.0, "section": "virus" },
-      { "key": "pathogenSeverity",     "label": "Pathogen severity",        "min": 0,   "max": 1,   "step": 0.05, "default": 0.5, "section": "pathogen",
-        "note": "0 = influenza-like · 0.5 = EBV/COVID · 1.0 = SARS-like" },
-      { "key": "economicStress",       "label": "Economic stress",          "min": 0,   "max": 1,   "step": 0.05, "default": 0.3, "section": "stressors" },
-      { "key": "pollution",            "label": "Pollution / toxin load",   "min": 0,   "max": 1,   "step": 0.05, "default": 0.3, "section": "stressors" },
-      { "key": "healthcareAccess",     "label": "Healthcare access",        "min": 0,   "max": 1,   "step": 0.05, "default": 0.5, "section": "stressors" },
-      { "key": "socialInfrastructure", "label": "Social infrastructure",    "min": 0,   "max": 1,   "step": 0.05, "default": 0.5, "section": "stressors" }
+      {"key":"economicStress",       "label":"Economic stress",       "min":0,"max":1,"step":0.05,"default":0.3},
+      {"key":"pollution",            "label":"Pollution / toxin load","min":0,"max":1,"step":0.05,"default":0.3},
+      {"key":"healthcareAccess",     "label":"Healthcare access",     "min":0,"max":1,"step":0.05,"default":0.5},
+      {"key":"socialInfrastructure", "label":"Social infrastructure", "min":0,"max":1,"step":0.05,"default":0.5}
     ]
   },
   "detail": {
     "click_hint": "Click any person in the simulation to see their individual profile, risk factors, and — if they develop ME/CFS — a brainstem disruption diagram.",
     "labels": {
-      "age":              "Age",
-      "sex":              "Sex",
-      "prior_ebv":        "Prior EBV",
-      "cfs_risk":         "CFS risk",
-      "risk_factors":     "Risk factors",
-      "acute_factors":    "Acute phase markers",
-      "autonomic_acute":  "Autonomic involvement",
-      "illness_severity": "Illness severity",
-      "symptoms":         "Symptom profile",
-      "brainstem":        "Brainstem / ANS disruption",
-      "sex_female":       "Female",
-      "sex_male":         "Male",
-      "ebv_yes":          "Yes",
-      "ebv_no":           "No",
-      "pending":          "Pending"
+      "age":"Age","sex":"Sex","prior_ebv":"Prior EBV","cfs_risk":"CFS risk",
+      "risk_factors":"Risk factors","acute_factors":"Acute phase markers",
+      "autonomic_acute":"Autonomic involvement","illness_severity":"Illness severity",
+      "symptoms":"Symptom profile","brainstem":"Brainstem / ANS disruption",
+      "sex_female":"Female","sex_male":"Male","ebv_yes":"Yes","ebv_no":"No","pending":"Pending"
     },
     "risk_factor_labels": [
-      "Genetic susceptibility",
-      "Baseline stress / trauma",
-      "Pre-existing conditions",
-      "Immune function (low)",
-      "Poor sleep quality",
-      "Economic stress",
-      "Pollution exposure",
-      "Social support (low)"
+      "Genetic susceptibility","Chronic stress / trauma","Pre-existing conditions",
+      "Immune function (low)","Poor sleep quality","Economic stress",
+      "Pollution exposure","Social support (low)",
+      "Neurodivergence","Emotional stress load","Brainstem load (structural)",
+      "Digestive health (poor)","Metabolic health (poor)",
+      "Low fitness","Poor diet quality",
+      "HHV-6 history","CMV history","Lyme disease history","Mycoplasma history"
     ],
     "symptom_labels": [
-      { "key": "fatigue",   "label": "Fatigue / energy envelope" },
-      { "key": "pem",       "label": "Post-exertional malaise",  "highlight": true },
-      { "key": "cognitive", "label": "Cognitive / brain fog" },
-      { "key": "autonomic", "label": "Autonomic dysregulation" },
-      { "key": "pain",      "label": "Pain" },
-      { "key": "sleep",     "label": "Sleep disruption" }
+      {"key":"fatigue",   "label":"Fatigue / energy envelope"},
+      {"key":"pem",       "label":"Post-exertional malaise","highlight":true},
+      {"key":"cognitive", "label":"Cognitive / brain fog"},
+      {"key":"autonomic", "label":"Autonomic dysregulation"},
+      {"key":"pain",      "label":"Pain"},
+      {"key":"sleep",     "label":"Sleep disruption"}
     ]
   },
   "narratives": {
@@ -107,11 +203,11 @@
     "viewpoint": {
       "healthy":    "You haven't been infected yet. Your risk factors are visible below — stay aware.",
       "exposed":    "You've been exposed. You may not feel it yet, but the virus has entered your system.",
-      "infectious": "You're in the acute phase. You're contagious. How your body handles this week matters a great deal.",
-      "recovering": "The acute phase has passed. Your body is still processing. How this resolves will be determined over the coming months — autonomic involvement during your acute illness is the key signal.",
+      "infectious": "You're in the acute phase. You're contagious. How your body handles this matters.",
+      "recovering": "The acute phase has passed. How this resolves will be determined over the coming months — your autonomic involvement during acute illness is the key signal.",
       "recovered":  "You recovered fully. Your risk factors were present, but the outcome went in your favour.",
-      "long_covid": "You have persistent post-viral symptoms. You're in the recovery window — many people in this state recover over 6–18 months. Some don't.",
-      "cfs":        "You've developed ME/CFS. This is your new reality. The brainstem disruption model below shows what's happening in your nervous system.",
+      "long_covid": "You have persistent post-viral symptoms. You're in the recovery window — many people recover over 6–18 months. Some don't.",
+      "cfs":        "You've developed ME/CFS. This is your new reality. The brainstem disruption diagram below shows what's happening in your nervous system.",
       "severe_cfs": "You have severe ME/CFS. You are largely bedbound. The gap between your cognitive self and your physical capacity is profound."
     }
   },
@@ -120,50 +216,53 @@
     "sections": [
       {
         "heading": "What this simulates",
-        "body": "A viral outbreak moves through a community of 100 individuals. Each person's probability of developing ME/CFS post-infection is computed from a multi-factor risk model calibrated to published epidemiological research. Long COVID cases follow a decay curve toward recovery; ME/CFS cases represent the hard floor that persists."
+        "body": "A viral or environmental outbreak moves through a community of 100 individuals. Each person's probability of developing ME/CFS post-infection is computed from a multi-factor risk model calibrated to published epidemiological research. Long COVID cases follow a decay curve toward recovery; ME/CFS cases represent the hard floor."
       },
       {
         "heading": "Post-viral illness is not new",
-        "body": "Post-viral conditions appear after every major pandemic. Historical review across 150 years shows large numbers affected after the 1890 Russian flu, the 1918 Spanish flu, SARS (2003), H1N1 (2009), and COVID-19. COVID accelerated research into the underlying mechanisms substantially."
+        "body": "Post-viral conditions appear after every major pandemic. Historical review across 150 years shows large numbers affected after the 1890 Russian flu, the 1918 Spanish flu, SARS (2003), H1N1 (2009), and COVID-19. COVID-19 substantially accelerated research into underlying mechanisms."
       },
       {
         "heading": "Prevalence across pathogens",
         "list": [
-          "COVID-19: WHO estimates 10–20% have symptoms beyond 3 months. Meta-analysis of 194 studies: 45% had at least one unresolved symptom at avg 126-day follow-up.",
-          "SARS (2003): 40% reported chronic fatigue at 4-year follow-up. 27% diagnosed with ME/CFS (Hong Kong cohort).",
-          "Influenza: 41% fatigue prevalence in survivors (meta-analysis). 20-year study: influenza patients had AHR 1.51 for developing CFS vs matched controls.",
+          "COVID-19: WHO 10–20% have symptoms beyond 3 months. Meta-analysis of 194 studies: 45% had at least one unresolved symptom at avg 126-day follow-up.",
+          "SARS (2003): 40% chronic fatigue at 4-year follow-up; 27% diagnosed ME/CFS (Hong Kong cohort).",
+          "Influenza: 41% fatigue prevalence in survivors (meta-analysis). 20-year study: AHR 1.51 for CFS vs controls.",
           "Ebola: 9–28% persistent fatigue. West Nile: 31%. Dengue: up to 82%.",
-          "Dubbo studies (EBV, Q fever, Ross River): 11% met ME/CFS criteria at 6 months — no significant difference across pathogens. Severity of acute infection was the main predictor."
+          "Dubbo studies (EBV, Q fever, Ross River): 11% ME/CFS at 6 months — pathogen-independent. Severity of acute infection was the main predictor."
         ]
       },
       {
         "heading": "The decay curve and the hard floor",
-        "body": "Long COVID prevalence in the U.S. declined from 18.9% (June 2022) to 11.0% (June 2023), then stabilised. The Chicago infectious mononucleosis study showed the same pattern: 13% met ME/CFS criteria at 6 months → 7% at 12 months → 4% at 24 months. Roughly 40–46% of remaining cases recover per 6-month window. The 4% floor represents those who do not recover — the ME/CFS reservoir. This simulation models both dynamics: Long COVID cases have a daily probability of recovery; ME/CFS cases do not."
+        "body": "Long COVID prevalence in the U.S. declined from 18.9% (June 2022) to 11.0% (June 2023), then stabilised. Chicago mono study: 13% ME/CFS-like at 6 months → 7% at 12 months → 4% at 24 months. ~40–46% of remaining cases recover per 6-month window. The 4% floor represents those who do not recover. This simulation models both: Long COVID cases gradually recover; ME/CFS cases represent the persistent floor."
       },
       {
         "heading": "Key predictors (cross-pathogen)",
         "list": [
-          "Severity of acute illness — the most replicated predictor across all studies.",
-          "Autonomic symptoms during acute phase — Chicago mono study: strongest single predictor of ME/CFS conversion, stronger than demographic factors.",
-          "Female sex — 2–3× elevated risk consistently across pathogens and studies.",
-          "Age 35–64 — peak risk for Long COVID phenotype (ONS data); older adults have elevated CFS risk from influenza.",
-          "Pre-existing conditions — autoimmune, metabolic, and psychiatric history all elevate risk.",
-          "Number of symptoms during acute phase.",
+          "Severity of acute illness — most replicated predictor across all studies.",
+          "Autonomic symptoms during acute phase — Chicago mono: strongest single predictor of ME/CFS conversion.",
+          "Female sex — 2–3× elevated risk consistently across pathogens.",
+          "Age 35–64 — peak risk for Long COVID phenotype (ONS); older adults elevated for influenza-related CFS.",
+          "Pre-existing conditions — autoimmune, metabolic, psychiatric history all elevate risk.",
           "Social support, sleep quality, economic stress — modulating factors throughout recovery."
         ]
       },
       {
+        "heading": "Environmental triggers",
+        "body": "Not all post-viral-syndrome triggers are viruses. Mycotoxin exposure (mold), organophosphate chemicals (Gulf War Illness), wildfire particulates, and post-disaster stress all generate ME/CFS-like syndromes through overlapping immune and autonomic dysregulation pathways. These are modelled as community-wide exposure events rather than person-to-person transmission."
+      },
+      {
         "heading": "Population-level burden",
-        "body": "Even a 2–5% chronic-illness conversion rate applied to pandemic-scale infections produces enormous absolute numbers. COVID infected billions globally; conservative estimates of persistent illness represent tens of millions added to the global disability burden — a slow-moving wave that follows the acute wave by 1–5 years and is much less visible in public discourse."
+        "body": "Even a 2–5% chronic-illness conversion rate applied to pandemic-scale infections produces tens of millions added to the global disability burden — a slow-moving wave that follows the acute wave by 1–5 years and is much less visible in public discourse."
       },
       {
         "heading": "Brainstem disruption model",
-        "body": "For individuals who develop ME/CFS, the profile view shows a simplified diagram of the brainstem and autonomic nervous system. The model reflects the dorsal vagal complex hyperactivation hypothesis (Porges), HPA axis blunting, and vagal dysregulation. Key structures: Hypothalamus/HPA, Nucleus Tractus Solitarius (NTS), Dorsal Vagal Complex (DVC), Locus Coeruleus (LC), Vagus nerve."
+        "body": "For individuals who develop ME/CFS, the profile view shows a simplified brainstem/ANS diagram reflecting dorsal vagal complex hyperactivation (Porges), HPA axis blunting, and vagal dysregulation. Structures: Hypothalamus/HPA, NTS, DVC, Locus Coeruleus (LC), Vagus nerve."
       },
       {
         "heading": "References",
         "body": "Wessely et al. 1995; Jason et al. 2006; Tomas &amp; Newton 2018; Dubbo Infection Outcomes Study (Hickie et al.); Chicago mono cohort (Katz et al.); ONS Long COVID surveys 2022–2024; Hong Kong SARS follow-up (Lee et al.); Porges polyvagal theory; VanElzakker vagus nerve hypothesis; Naviaux metabolic model.",
-        "style": "ref"
+        "style":"ref"
       },
       {
         "heading": "This is a model, not a prediction",

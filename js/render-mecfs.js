@@ -6,133 +6,229 @@ export async function loadSimContent() {
   return await resp.json();
 }
 
-export function renderSimPage(c) {
-  // Title / brand
+export function renderSimPage(c, simRef) {
   document.title = c.page.title;
   document.querySelectorAll('[data-slot="brand"]').forEach(el => el.textContent = c.site.brand);
   document.querySelectorAll('[data-slot="brand-short"]').forEach(el => el.textContent = c.site.brand_short);
   document.querySelectorAll('[data-slot="breadcrumb"]').forEach(el => el.textContent = c.page.breadcrumb);
 
-  // Toolbar hint
   const hint = document.getElementById('toolbarHint');
   if (hint) hint.textContent = c.toolbar.hint;
 
-  // Legend
-  const legendEl = document.getElementById('legendEl');
-  if (legendEl) {
-    const hdr = legendEl.querySelector('div');
-    legendEl.innerHTML = '';
-    if (hdr) legendEl.appendChild(hdr);
-    else {
-      const h = document.createElement('div');
-      h.style.cssText = 'font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px';
-      h.textContent = 'Status key';
-      legendEl.appendChild(h);
-    }
-    c.legend.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'legend-row';
-      row.innerHTML = `<div class="legend-dot" style="background:${item.color}"></div>${item.label}`;
-      legendEl.appendChild(row);
+  renderLegend(c);
+  renderOutbreaks(c, simRef);
+  renderEnvironment(c, simRef);
+  renderYouProfile(c, simRef);
+  renderAbout(c);
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────
+function renderLegend(c) {
+  const el = document.getElementById('legendEl');
+  if (!el) return;
+  el.innerHTML = '<div class="legend-hdr">Status key</div>';
+  c.legend.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'legend-row';
+    row.innerHTML = `<div class="legend-dot" style="background:${item.color}"></div>${item.label}`;
+    el.appendChild(row);
+  });
+}
+
+// ── Outbreak selector ────────────────────────────────────────────────────
+function renderOutbreaks(c, simRef) {
+  const wrap = document.getElementById('outbreakGrid');
+  if (!wrap || !c.outbreaks) return;
+  wrap.innerHTML = '';
+
+  const CATEGORY_COLOR = {
+    'Respiratory virus': '#2a5a6a',
+    'Viral':             '#2a4a6a',
+    'Viral (vector)':    '#2a3a5a',
+    'Bacterial':         '#4a3a2a',
+    'Bacterial (tick)':  '#4a4a2a',
+    'Environmental':     '#2a4a3a',
+    'Environmental (mixed)': '#3a4a3a',
+  };
+
+  c.outbreaks.forEach((ob, idx) => {
+    const card = document.createElement('div');
+    card.className = 'outbreak-card' + (idx === 0 ? ' active' : '');
+    card.dataset.id = ob.id;
+    const catColor = CATEGORY_COLOR[ob.category] || '#2a3a4a';
+    card.innerHTML = `
+      <div class="ob-label">${ob.label}</div>
+      <div class="ob-cat" style="background:${catColor}">${ob.category}</div>
+      <div class="ob-desc">${ob.desc}</div>`;
+    card.addEventListener('click', () => {
+      wrap.querySelectorAll('.outbreak-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      if (simRef?.current) simRef.current.setOutbreak(ob);
     });
-  }
+    wrap.appendChild(card);
+  });
 
-  // Environment controls
-  const virusSection = document.getElementById('envVirusSection');
-  const stressorSection = document.getElementById('envStressorSection');
-  const envFooter = document.getElementById('envFooterNote');
-
-  if (virusSection)   virusSection.querySelector('h4').textContent   = c.environment.virus_section;
-  if (stressorSection) stressorSection.querySelector('h4').textContent = c.environment.stressors_section;
-  if (envFooter) envFooter.textContent = c.environment.footer_note;
-
-  const envBody = document.getElementById('envControls');
-  if (envBody) {
-    // Clear existing inputs and rebuild from JSON
-    envBody.innerHTML = '';
-    const virusDiv = document.createElement('div');
-    virusDiv.className = 'env-section';
-    virusDiv.innerHTML = `<h4>${c.environment.virus_section}</h4>`;
-    const stressDiv = document.createElement('div');
-    stressDiv.className = 'env-section';
-    stressDiv.style.marginTop = '12px';
-    stressDiv.innerHTML = `<h4>${c.environment.stressors_section}</h4>`;
-
-    // Build a section map from the controls
-    const sections = {};
-    c.environment.controls.forEach(ctrl => {
-      const sec = ctrl.section;
-      if (!sections[sec]) {
-        let div;
-        if (sec === 'virus')    div = virusDiv;
-        else if (sec === 'pathogen') {
-          div = document.createElement('div');
-          div.className = 'env-section';
-          div.style.marginTop = '12px';
-          div.innerHTML = `<h4>${c.environment.pathogen_section || 'Pathogen type'}</h4>`;
-        }
-        else {
-          div = stressDiv;
-        }
-        sections[sec] = div;
-      }
-      const row = document.createElement('div');
-      row.className = 'env-row';
-      row.innerHTML = `
-        <label>${ctrl.label} <span id="v-${ctrl.key}">${ctrl.default}</span></label>
-        <input type="range" data-env="${ctrl.key}"
-               min="${ctrl.min}" max="${ctrl.max}"
-               step="${ctrl.step}" value="${ctrl.default}" />
-        ${ctrl.note ? `<div style="font-size:.72rem;color:var(--muted);margin-top:2px;opacity:.7">${ctrl.note}</div>` : ''}`;
-      sections[sec].appendChild(row);
-    });
-    // Append sections in order: virus, pathogen (if any), stressors
-    envBody.appendChild(virusDiv);
-    if (sections.pathogen) envBody.appendChild(sections.pathogen);
-    envBody.appendChild(stressDiv);
-
-    const note = document.createElement('p');
-    note.style.cssText = 'font-size:.78rem;color:var(--muted);margin-top:12px;line-height:1.5';
-    note.textContent = c.environment.footer_note;
-    envBody.appendChild(note);
-  }
-
-  // About tab
-  const aboutBody = document.getElementById('aboutBody');
-  if (aboutBody && c.about) {
-    aboutBody.innerHTML = `<h3 style="margin-top:0">${c.about.heading}</h3>`;
-    c.about.sections.forEach(sec => {
-      const h = document.createElement('h3');
-      h.textContent = sec.heading;
-      aboutBody.appendChild(h);
-      if (sec.list) {
-        const ul = document.createElement('ul');
-        sec.list.forEach(item => {
-          const li = document.createElement('li');
-          li.textContent = item;
-          ul.appendChild(li);
-        });
-        aboutBody.appendChild(ul);
-      }
-      if (sec.body) {
-        const p = document.createElement('p');
-        p.innerHTML = sec.body;
-        if (sec.style) p.className = sec.style;
-        aboutBody.appendChild(p);
-      }
-      if (sec.detail) {
-        const p2 = document.createElement('p');
-        p2.textContent = sec.detail;
-        aboutBody.appendChild(p2);
-      }
-    });
+  // Apply default outbreak on next tick (after sim is ready)
+  if (c.outbreaks[0]) {
+    setTimeout(() => simRef?.current?.setOutbreak(c.outbreaks[0]), 100);
   }
 }
 
-// Returns narrative text for a person given their status and whether they are the viewpoint char.
+// ── Environment stressors ────────────────────────────────────────────────
+function renderEnvironment(c, simRef) {
+  const wrap = document.getElementById('envControls');
+  if (!wrap) return;
+  wrap.innerHTML = `<div class="env-section"><h4>${c.environment.stressors_section}</h4></div>`;
+  const sec = wrap.querySelector('.env-section');
+
+  c.environment.controls.forEach(ctrl => {
+    const row = document.createElement('div');
+    row.className = 'env-row';
+    row.innerHTML = `
+      <label>${ctrl.label} <span id="v-${ctrl.key}">${ctrl.default}</span></label>
+      <input type="range" data-env="${ctrl.key}"
+             min="${ctrl.min}" max="${ctrl.max}" step="${ctrl.step}" value="${ctrl.default}" />`;
+    sec.appendChild(row);
+  });
+
+  const note = document.createElement('p');
+  note.style.cssText = 'font-size:.78rem;color:var(--muted);margin-top:12px;line-height:1.5';
+  note.textContent = c.environment.footer_note;
+  wrap.appendChild(note);
+}
+
+// ── YOU profile ───────────────────────────────────────────────────────────
+export function renderYouProfile(c, simRef) {
+  const wrap = document.getElementById('youProfileBody');
+  if (!wrap || !c.you_profile) return;
+
+  const prof = c.you_profile;
+  wrap.innerHTML = `<p class="you-desc">${prof.description}</p>`;
+
+  prof.fields.forEach(field => {
+    const row = document.createElement('div');
+    row.className = 'env-row';
+
+    if (field.type === 'range') {
+      row.innerHTML = `
+        <label>${field.label} <span id="yv-${field.key}">${
+          field.key === 'age' ? field.default : field.default.toFixed(2)
+        }</span></label>
+        <input type="range" data-you="${field.key}"
+               min="${field.min}" max="${field.max}" step="${field.step || 0.05}"
+               value="${field.default}" />`;
+    } else if (field.type === 'toggle') {
+      const opts = field.options;
+      row.innerHTML = `
+        <label>${field.label}</label>
+        <div class="you-toggle" data-you="${field.key}">
+          <button class="you-opt ${field.default === opts[0] || field.default === true ? 'active' : ''}"
+                  data-val="${opts[0]}">${opts[0]}</button>
+          <button class="you-opt ${field.default === opts[1] || field.default === false ? 'active' : ''}"
+                  data-val="${opts[1]}">${opts[1]}</button>
+        </div>`;
+    }
+    wrap.appendChild(row);
+  });
+
+  // Reset button
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'tb-btn';
+  resetBtn.style.marginTop = '12px';
+  resetBtn.textContent = prof.reset_label || 'Randomise';
+  resetBtn.addEventListener('click', () => {
+    if (simRef?.current) simRef.current.randomiseViewpoint();
+    refreshYouDisplay(c, simRef);
+  });
+  wrap.appendChild(resetBtn);
+
+  // Wire inputs
+  wrap.querySelectorAll('input[data-you]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const key = inp.dataset.you;
+      const val = +inp.value;
+      const disp = document.getElementById('yv-' + key);
+      if (disp) disp.textContent = key === 'age' ? val : val.toFixed(2);
+      if (simRef?.current) simRef.current.updateViewpointParam(key, val);
+    });
+  });
+
+  wrap.querySelectorAll('.you-toggle').forEach(tog => {
+    tog.querySelectorAll('.you-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tog.querySelectorAll('.you-opt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const key  = tog.dataset.you;
+        const rawVal = btn.dataset.val;
+        // Convert string values to appropriate types
+        let val;
+        if (rawVal === 'Yes' || rawVal === 'Female') val = key === 'priorEBV' ? true : 'F';
+        else if (rawVal === 'No'  || rawVal === 'Male') val = key === 'priorEBV' ? false : 'M';
+        else val = rawVal;
+        if (simRef?.current) simRef.current.updateViewpointParam(key, val);
+      });
+    });
+  });
+}
+
+function refreshYouDisplay(c, simRef) {
+  const vp = simRef?.current?.getViewpointParams();
+  if (!vp) return;
+  c.you_profile.fields.forEach(field => {
+    if (field.type === 'range') {
+      const inp = document.querySelector(`input[data-you="${field.key}"]`);
+      const disp = document.getElementById('yv-' + field.key);
+      if (inp && vp[field.key] !== undefined) {
+        inp.value = vp[field.key];
+        if (disp) disp.textContent = field.key === 'age' ? vp[field.key] : (+vp[field.key]).toFixed(2);
+      }
+    } else if (field.type === 'toggle') {
+      const tog = document.querySelector(`.you-toggle[data-you="${field.key}"]`);
+      if (tog) {
+        const val = vp[field.key];
+        tog.querySelectorAll('.you-opt').forEach(btn => {
+          const match = (val === true && btn.dataset.val === 'Yes') ||
+                        (val === false && btn.dataset.val === 'No') ||
+                        (val === 'F' && btn.dataset.val === 'Female') ||
+                        (val === 'M' && btn.dataset.val === 'Male');
+          btn.classList.toggle('active', match);
+        });
+      }
+    }
+  });
+}
+
+// ── About tab ────────────────────────────────────────────────────────────
+function renderAbout(c) {
+  const el = document.getElementById('aboutBody');
+  if (!el || !c.about) return;
+  el.innerHTML = `<h3 style="margin-top:0">${c.about.heading}</h3>`;
+  c.about.sections.forEach(sec => {
+    const h = document.createElement('h3');
+    h.textContent = sec.heading;
+    el.appendChild(h);
+    if (sec.list) {
+      const ul = document.createElement('ul');
+      sec.list.forEach(item => {
+        const li = document.createElement('li'); li.textContent = item; ul.appendChild(li);
+      });
+      el.appendChild(ul);
+    }
+    if (sec.body) {
+      const p = document.createElement('p');
+      p.innerHTML = sec.body;
+      if (sec.style) p.className = sec.style;
+      el.appendChild(p);
+    }
+    if (sec.detail) {
+      const p2 = document.createElement('p'); p2.textContent = sec.detail; el.appendChild(p2);
+    }
+  });
+}
+
 export function getNarrative(c, status, name, isViewpoint) {
-  const template = isViewpoint
+  const tmpl = isViewpoint
     ? c.narratives.viewpoint[status]
     : c.narratives.generic[status];
-  return (template || '').replace(/\{name\}/g, name);
+  return (tmpl || '').replace(/\{name\}/g, name);
 }
