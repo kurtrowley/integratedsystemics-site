@@ -1,8 +1,8 @@
 {
   "site": {
-    "brand": "Integrated Systemics",
-    "brand_short": "IS",
-    "tagline": "Systems-based training · writing · research"
+    "brand": "Systemic Writer",
+    "brand_short": "SW",
+    "tagline": "Systems-based writing method · training simulators · applied systemic research"
   },
   "nav": [
     { "label": "Work",        "href": "#work" },
@@ -12,9 +12,9 @@
     { "label": "Vision",      "href": "#vision" }
   ],
   "hero": {
-    "eyebrow": "Systems-based research, training, and development",
-    "headline": "Build human capability for a more complex world.",
-    "lede": "Integrated Systemics develops high-end training, writing systems, and research-backed frameworks for health reclamation, expert communication, and future-oriented human development.",
+    "eyebrow": "Systems-based writing, simulators, research",
+    "headline": "Building human capability for a more complex world.",
+    "lede": "Systemic Writer supports the development of high-end training, writing systems, and research-backed simulation based training frameworks for health reclamation, expert communication, and future-oriented human development.",
     "cta_primary":   { "text": "Explore programs",    "href": "#programs" },
     "cta_secondary": { "text": "See writing systems",  "href": "#writing" },
     "aside_kicker":  "What this is",
@@ -22,7 +22,7 @@
     "aside_stats": [
       { "label": "Training",  "body": "Premium programs for skills, health, and capability rebuilding." },
       { "label": "Writing",   "body": "AI-assisted but expert-led processes for books, articles, and strategy." },
-      { "label": "Research",  "body": "Think-tank style exploration of complex systems and future society." }
+      { "label": "Research",  "body": "Think-tank style exploration of complex systems and future society (something to write about)." }
     ]
   },
   "sections": [
